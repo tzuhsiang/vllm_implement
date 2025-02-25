@@ -9,6 +9,7 @@
 - Docker 容器化部署
 - GPU 加速支援
 - 可配置的代理設定
+- 使用 Git LFS 管理大型模型文件
 
 ## 系統需求
 
@@ -16,6 +17,7 @@
 - Docker
 - Docker Compose
 - CUDA 驅動版本 >= 11.8
+- Git LFS
 
 ## 專案結構
 
@@ -35,21 +37,46 @@ vllm_implement/
 
 ## 快速開始
 
-1. 下載模型並放置到 model 目錄：
+### 1. 安裝 Git LFS
+
+如果尚未安裝 Git LFS，請先安裝：
+
 ```bash
-cd model
-git clone https://huggingface.co/openlm-research/open_llama_7b
+# Ubuntu/Debian
+sudo apt install git-lfs
+
+# macOS
+brew install git-lfs
+
+# 初始化 Git LFS
+git lfs install
 ```
 
-2. 配置代理設定（如需要）：
-編輯 `env/proxy.env`
+### 2. 克隆專案（包含模型）
 
-3. 啟動服務：
+```bash
+# 克隆專案（這會自動下載模型文件）
+git clone https://github.com/tzuhsiang/vllm_implement.git
+cd vllm_implement
+
+# 如果模型文件沒有自動下載，手動執行：
+git lfs pull
+```
+
+> 注意：模型文件較大，下載可能需要一些時間。確保您有足夠的網路帶寬和磁碟空間。
+
+### 3. 配置代理設定（如需要）
+
+編輯 `env/proxy.env` 文件設定代理伺服器。
+
+### 4. 啟動服務
+
 ```bash
 docker compose up --build
 ```
 
-4. 測試服務：
+### 5. 測試服務
+
 ```bash
 # 使用提供的測試腳本
 python app/test_api.py
@@ -81,6 +108,29 @@ curl -X POST "http://localhost:8000/generate" \
 ### 健康檢查 `/health`
 
 用於確認服務狀態。
+
+## 故障排除
+
+### 模型文件下載問題
+
+如果遇到模型文件下載問題：
+
+1. 確認已安裝 Git LFS：
+```bash
+git lfs install
+```
+
+2. 強制重新下載 LFS 文件：
+```bash
+git lfs fetch --all
+git lfs pull
+```
+
+3. 檢查代理設定：
+如果在代理環境中，確保 Git 也配置了正確的代理：
+```bash
+git config --global http.proxy http://proxy-server:port
+```
 
 ## 貢獻
 
