@@ -67,7 +67,20 @@ git lfs pull
 
 ### 3. 配置代理設定（如需要）
 
-編輯 `env/proxy.env` 文件設定代理伺服器。
+```bash
+# 複製代理設定範本
+cp env/proxy.env.example env/proxy.env
+
+# 編輯代理設定
+vim env/proxy.env  # 或使用其他編輯器
+```
+
+修改 `env/proxy.env` 中的代理設定：
+```ini
+HTTP_PROXY=http://your-proxy-server:port
+HTTPS_PROXY=http://your-proxy-server:port
+NO_PROXY=localhost,127.0.0.1
+```
 
 ### 4. 啟動服務
 
