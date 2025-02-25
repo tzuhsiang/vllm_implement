@@ -3,7 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -21,10 +20,7 @@ var/
 
 # Virtual Environment
 venv/
-ENV/
-
-# Keep model directory structure
-!model/
+.venv/
 
 # IDE
 .idea/
@@ -35,9 +31,7 @@ ENV/
 # Logs
 *.log
 
-# Local env files
-.env.local
-.env.*.local
+# Environment files
 env/proxy.env
 
 # Docker
