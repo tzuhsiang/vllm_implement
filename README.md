@@ -1,6 +1,14 @@
-# vLLM 推論服務
+# vLLM API 服務實作
 
-這是一個使用 vLLM 建立的高效能 LLM 推論服務。本專案使用 Docker 進行容器化部署，並提供 REST API 介面。
+這個專案實作了一個基於 vLLM 的高效能推論 API 服務，使用 Docker 容器化部署。
+
+## 功能特點
+
+- 使用 OpenLLaMA 7B 作為基礎模型
+- FastAPI 實作 REST API
+- Docker 容器化部署
+- GPU 加速支援
+- 可配置的代理設定
 
 ## 系統需求
 
@@ -13,94 +21,71 @@
 
 ```
 vllm_implement/
-├── app/
-│   ├── main.py          # FastAPI 應用程式
-│   └── test_api.py      # API 測試腳本
-├── config/
-│   └── settings.env     # 環境變數配置
-├── model/               # 模型存放目錄
-├── docker-compose.yml   # Docker Compose 配置
-├── Dockerfile          # Docker 映像檔配置
-└── requirements.txt    # Python 套件依賴
+├── app/              # API 服務程式碼
+│   ├── main.py      # FastAPI 應用程式
+│   └── test_api.py  # API 測試腳本
+├── config/           # 配置文件
+│   └── settings.env # 環境設定
+├── env/             # 環境變數
+│   └── proxy.env    # 代理設定
+├── model/           # 模型存放目錄
+├── Dockerfile       # Docker 映像檔配置
+└── docker-compose.yml
 ```
 
 ## 快速開始
 
-1. 複製模型檔案到 model 目錄：
-   ```bash
-   # 將您的模型檔案放到 model 目錄中
-   cp /path/to/your/model/* ./model/
-   ```
+1. 下載模型並放置到 model 目錄：
+```bash
+cd model
+git clone https://huggingface.co/openlm-research/open_llama_7b
+```
 
-2. 配置環境變數：
-   - 檢查並修改 `config/settings.env` 中的設定
-   - 特別注意 `MODEL_PATH` 和 GPU 相關設定
+2. 配置代理設定（如需要）：
+編輯 `env/proxy.env`
 
 3. 啟動服務：
-   ```bash
-   docker compose up --build
-   ```
+```bash
+docker compose up --build
+```
 
 4. 測試服務：
-   ```bash
-   # 在另一個終端中執行測試腳本
-   python app/test_api.py "您的測試文本"
-   ```
-
-## API 端點
-
-### 1. 文本生成 `/generate`
-
-**請求範例：**
 ```bash
+# 使用提供的測試腳本
+python app/test_api.py
+
+# 或使用 curl
 curl -X POST "http://localhost:8000/generate" \
      -H "Content-Type: application/json" \
      -d '{
-       "prompt": "請用繁體中文解釋什麼是人工智慧？",
-       "max_tokens": 512,
-       "temperature": 0.7,
-       "top_p": 0.95
-     }'
+           "prompt": "請解釋什麼是人工智慧？",
+           "max_tokens": 512,
+           "temperature": 0.7
+         }'
 ```
 
-### 2. 健康檢查 `/health`
+## API 端點
 
-**請求範例：**
-```bash
-curl "http://localhost:8000/health"
+### 生成文本 `/generate`
+
+**請求格式：**
+```json
+{
+    "prompt": "您的提示詞",
+    "max_tokens": 512,
+    "temperature": 0.7,
+    "top_p": 0.95
+}
 ```
 
-## 配置說明
+### 健康檢查 `/health`
 
-### 環境變數
+用於確認服務狀態。
 
-可在 `config/settings.env` 中配置以下參數：
+## 貢獻
 
-- `MODEL_PATH`: 模型路徑
-- `MAX_TOKENS`: 最大生成 token 數
-- `HOST`: 服務主機
-- `PORT`: 服務連接埠
-- `CUDA_VISIBLE_DEVICES`: 使用的 GPU 設備
-- `GPU_MEMORY_UTILIZATION`: GPU 記憶體使用率
-- `MAX_NUM_BATCHED_TOKENS`: 批次處理的最大 token 數
+歡迎提交 Issue 或 Pull Request 來改進這個專案。
 
-## 故障排除
+## 授權
 
-1. 如果遇到 CUDA 錯誤：
-   - 確認 NVIDIA 驅動版本是否符合要求
-   - 檢查 GPU 是否被正確識別
-
-2. 如果服務無法啟動：
-   - 檢查日誌輸出
-   - 確認 model 目錄中是否有正確的模型檔案
-   - 驗證環境變數設定
-
-3. 如果 API 回應過慢：
-   - 調整 `MAX_NUM_BATCHED_TOKENS`
-   - 檢查 GPU 記憶體使用情況
-
-## 注意事項
-
-- 請確保 model 目錄中放置了正確的模型檔案
-- 建議在生產環境中調整 `settings.env` 中的參數以優化效能
-- 使用代理伺服器時，請確認 `docker-compose.yml` 中的代理設定正確
+本專案使用 MIT 授權。請注意，使用的語言模型可能有其自己的授權條款。
