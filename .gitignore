@@ -34,6 +34,10 @@ venv/
 # Environment files
 env/proxy.env
 
+# Model files - exclude all except open_llama_7b
+model/*
+!model/open_llama_7b/
+
 # Docker
 .docker/
 

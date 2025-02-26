@@ -19,9 +19,9 @@ MAX_TOKENS = int(os.getenv("MAX_TOKENS", "512"))
 try:
     llm = LLM(
         model=MODEL_PATH,
-        trust_remote_code=False,
+        # trust_remote_code=True,  # Qwen 需要這個設定
         dtype="float16",
-        gpu_memory_utilization=0.8
+        gpu_memory_utilization=0.85
     )
     logger.info(f"Model loaded successfully from {MODEL_PATH}")
 except Exception as e:

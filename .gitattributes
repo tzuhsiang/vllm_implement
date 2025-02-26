@@ -1,3 +1,5 @@
-model/**/*.bin filter=lfs diff=lfs merge=lfs -text
-model/**/*.json filter=lfs diff=lfs merge=lfs -text
-model/**/*.model filter=lfs diff=lfs merge=lfs -text
+model/open_llama_7b/**/*.safetensors filter=lfs diff=lfs merge=lfs -text
+model/open_llama_7b/**/*.model filter=lfs diff=lfs merge=lfs -text
+model/open_llama_7b/**/*.bin filter=lfs diff=lfs merge=lfs -text
+model/open_llama_7b/**/*.json filter=lfs diff=lfs merge=lfs -text
+model/**/* -filter -diff -merge -text
