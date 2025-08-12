@@ -2,20 +2,17 @@ version: '3.8'
 
 services:
   vllm:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - HTTP_PROXY=${HTTP_PROXY}
-        - HTTPS_PROXY=${HTTPS_PROXY}
-    env_file:
-      - ./env/proxy.env
+    image: vllm/vllm-openai:v0.10.0
+    container_name: vllm
+    command: ["--model", "/models/gemma-3-4b-it","--served-model-name","gemma-3-4b-it"]
     ports:
-      - "8000:8000"
+      - "9999:8000"
     volumes:
-      - ./app:/app
-      - ./model:/model
-      - ./config:/config
+      - ./models/gemma-3-4b-it:/models/gemma-3-4b-it
+    environment:
+      - TRANSFORMERS_OFFLINE=1
+    ipc: host
+    restart: unless-stopped
     deploy:
       resources:
         reservations:
@@ -23,8 +20,3 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-    command: >
-      bash -c "
-        source /config/settings.env &&
-        python3 -m uvicorn main:app --host 0.0.0.0 --port 8000
-      "

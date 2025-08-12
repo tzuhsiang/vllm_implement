@@ -15,18 +15,22 @@ app = FastAPI(title="vLLM Inference API")
 MODEL_PATH = os.getenv("MODEL_PATH", "/model/open_llama_7b")
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "512"))
 
-# 初始化 vLLM
-try:
-    llm = LLM(
-        model=MODEL_PATH,
-        # trust_remote_code=True,  # Qwen 需要這個設定
-        dtype="float16",
-        gpu_memory_utilization=0.85
-    )
-    logger.info(f"Model loaded successfully from {MODEL_PATH}")
-except Exception as e:
-    logger.error(f"Error loading model: {str(e)}")
-    raise
+llm = None
+
+@app.on_event("startup")
+def load_model():
+    global llm
+    try:
+        llm = LLM(
+            model=MODEL_PATH,
+            # trust_remote_code=True,  # Qwen 需要這個設定
+            dtype="float16",
+            gpu_memory_utilization=0.85
+        )
+        logger.info(f"Model loaded successfully from {MODEL_PATH}")
+    except Exception as e:
+        logger.error(f"Error loading model: {str(e)}")
+        raise
 
 class GenerateRequest(BaseModel):
     prompt: str
@@ -58,11 +62,19 @@ async def generate_text(request: GenerateRequest):
         outputs = llm.generate([request.prompt], sampling_params)
         generated_text = outputs[0].outputs[0].text
 
-        # 計算 token 使用量
+        # 使用 tokenizer 計算 token 數量（如果可用）
+        try:
+            tokenizer = llm.llm_engine.tokenizer
+            prompt_tokens = len(tokenizer.encode(request.prompt))
+            completion_tokens = len(tokenizer.encode(generated_text))
+        except Exception:
+            prompt_tokens = len(request.prompt.split())
+            completion_tokens = len(generated_text.split())
+
         usage = {
-            "prompt_tokens": len(request.prompt.split()),  # 簡單估算
-            "completion_tokens": len(generated_text.split()),  # 簡單估算
-            "total_tokens": len(request.prompt.split()) + len(generated_text.split())
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": prompt_tokens + completion_tokens
         }
 
         return GenerateResponse(text=generated_text, usage=usage)
